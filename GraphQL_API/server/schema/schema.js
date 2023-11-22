@@ -7,6 +7,7 @@ const {
   GraphQLSchema,
   GraphQLInt,
   GraphQLID,
+  GraphQLList,
 } = graphql;
 const _ = require('lodash');
 
@@ -24,7 +25,8 @@ const tasks = [
     weight: 1,
     description:
       'Copy the content of 0-index.html into 1-index.html Create the head and body sections inside the html tag, create the head and body tags (empty) in this order',
-  },
+    projectId: '1',
+    },
 ];
 
 const projects = [
@@ -51,6 +53,13 @@ const TaskType = new GraphQLObjectType({
     title: { type: GraphQLString },
     weight: { type: GraphQLInt },
     description: { type: GraphQLString },
+    project: {
+      type: ProjectType,
+      resolve(parent, args) {
+        console.log(parent);
+        return _.find(projects, { id: parent.projectId });
+      },
+    },
   }),
 });
 
@@ -61,6 +70,14 @@ const ProjectType = new GraphQLObjectType({
     title: { type: GraphQLString },
     weight: { type: GraphQLInt },
     description: { type: GraphQLString },
+    tasks: {
+      type: new GraphQLList(TaskType),
+      resolve(parent, args) {
+        // show tasks that match project
+        console.log(parent);
+        return _.filter(tasks, { projectId: parent.id });
+      },
+    },
   }),
 });
 
